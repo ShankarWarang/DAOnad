@@ -72,7 +72,7 @@ export default function FounderMode() {
         milestoneDescriptions,
         milestoneAmounts.map((a) => BigInt(a)),
         milestoneDeadlines.map((d) => BigInt(d)),
-        formData.questionAnswers,
+        formData.questionAnswers as [string, string, string, string, string, string, string, string],
       ],
     });
   };
@@ -238,10 +238,10 @@ export default function FounderMode() {
                 : 'Create Project'}
           </button>
 
-          {isSuccess && (
+          {isSuccess && hash?.hash && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-green-800">
-                Transaction successful! Hash: {formatAddress(hash || '')}
+                Transaction successful! Hash: {formatAddress(hash.hash)}
               </p>
             </div>
           )}
