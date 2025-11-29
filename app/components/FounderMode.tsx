@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useContractWrite, useWaitForTransaction } from 'wagmi';
 import { parseUnits } from 'viem';
 import { DAONAD_ABI } from '../config/abis';
 import { formatAddress } from '../utils/format';
@@ -28,8 +28,12 @@ export default function FounderMode() {
     questionAnswers: Array(8).fill(''),
   });
 
-  const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const { write, data: hash, isLoading: isPending } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
+    abi: DAONAD_ABI,
+    functionName: 'createProject',
+  });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
     hash,
   });
 
@@ -58,10 +62,7 @@ export default function FounderMode() {
     );
     const deadline = Math.floor(new Date(formData.deadline).getTime() / 1000);
 
-    writeContract({
-      address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
-      abi: DAONAD_ABI,
-      functionName: 'createProject',
+    write({
       args: [
         formData.title,
         formData.description,

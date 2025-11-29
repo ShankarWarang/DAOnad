@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useContractRead, useContractWrite, useWaitForTransaction } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import { DAONAD_ABI, USDC_ABI } from '../config/abis';
 import { formatAddress } from '../utils/format';
@@ -12,21 +12,31 @@ export default function BackerMode() {
   const [backingAmount, setBackingAmount] = useState('');
 
   // Get user's backed projects
-  const { data: backedProjects } = useReadContract({
+  const { data: backedProjects } = useContractRead({
     address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
     abi: DAONAD_ABI,
     functionName: 'getBackerProjects',
     args: address ? [address] : undefined,
+    enabled: !!address,
   });
 
-  const { writeContract, data: approveHash, isPending: isApproving } = useWriteContract();
-  const { data: backHash, isPending: isBacking } = useWriteContract();
+  const { write: approveWrite, data: approveHash, isLoading: isApproving } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`,
+    abi: USDC_ABI,
+    functionName: 'approve',
+  });
   
-  const { isLoading: isApproveConfirming, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({
+  const { write: backWrite, data: backHash, isLoading: isBacking } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
+    abi: DAONAD_ABI,
+    functionName: 'backProject',
+  });
+  
+  const { isLoading: isApproveConfirming, isSuccess: isApproveSuccess } = useWaitForTransaction({
     hash: approveHash,
   });
   
-  const { isLoading: isBackConfirming, isSuccess: isBackSuccess } = useWaitForTransactionReceipt({
+  const { isLoading: isBackConfirming, isSuccess: isBackSuccess } = useWaitForTransaction({
     hash: backHash,
   });
 
@@ -35,13 +45,9 @@ export default function BackerMode() {
 
     const amount = parseUnits(backingAmount, 6);
     const daonadAddress = process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`;
-    const usdcAddress = process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`;
 
     // First approve USDC
-    writeContract({
-      address: usdcAddress,
-      abi: USDC_ABI,
-      functionName: 'approve',
+    approveWrite({
       args: [daonadAddress, amount],
     });
   };
@@ -49,14 +55,11 @@ export default function BackerMode() {
   // After approval, back the project
   useEffect(() => {
     if (isApproveSuccess && selectedProject !== null && backingAmount) {
-      writeContract({
-        address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
-        abi: DAONAD_ABI,
-        functionName: 'backProject',
+      backWrite({
         args: [BigInt(selectedProject), parseUnits(backingAmount, 6)],
       });
     }
-  }, [isApproveSuccess, selectedProject, backingAmount, writeContract]);
+  }, [isApproveSuccess, selectedProject, backingAmount, backWrite]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -133,7 +136,7 @@ export default function BackerMode() {
 }
 
 function BackedProjectCard({ projectId }: { projectId: number }) {
-  const { data: project } = useReadContract({
+  const { data: project } = useContractRead({
     address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
     abi: DAONAD_ABI,
     functionName: 'getProject',

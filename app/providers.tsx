@@ -1,8 +1,9 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, createConfig, http } from 'wagmi';
+import { WagmiProvider, createClient, configureChains } from 'wagmi';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { defineChain } from 'viem';
 import '@rainbow-me/rainbowkit/styles.css';
 import { useState } from 'react';
@@ -29,27 +30,36 @@ const monadTestnet = defineChain({
   testnet: true,
 });
 
+const { chains, provider } = configureChains(
+  [monadTestnet],
+  [
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: process.env.NEXT_PUBLIC_MONAD_RPC_URL || 'https://testnet-rpc.monad.xyz',
+      }),
+    }),
+  ]
+);
+
 const { connectors } = getDefaultWallets({
   appName: 'DAOnad',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
-  chains: [monadTestnet],
+  chains,
 });
 
-const config = createConfig({
-  chains: [monadTestnet],
+const wagmiClient = createClient({
+  autoConnect: true,
   connectors,
-  transports: {
-    [monadTestnet.id]: http(),
-  },
+  provider,
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider client={wagmiClient}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

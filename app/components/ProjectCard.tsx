@@ -1,13 +1,13 @@
 'use client';
 
-import { useReadContract } from 'wagmi';
+import { useContractRead } from 'wagmi';
 import { formatUnits } from 'viem';
 import { DAONAD_ABI } from '../config/abis';
 import { formatAddress } from '../utils/format';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function ProjectCard({ projectId }: { projectId: number }) {
-  const { data: project, isLoading } = useReadContract({
+  const { data: project, isLoading } = useContractRead({
     address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
     abi: DAONAD_ABI,
     functionName: 'getProject',

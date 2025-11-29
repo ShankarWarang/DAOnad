@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useReadContract } from 'wagmi';
+import { useContractRead } from 'wagmi';
 import { formatUnits } from 'viem';
 import { DAONAD_ABI } from '../config/abis';
 import ProjectCard from './ProjectCard';
@@ -11,7 +11,7 @@ export default function ProjectList() {
   const [projectCounter, setProjectCounter] = useState(0);
 
   // Get project counter
-  const { data: counter } = useReadContract({
+  const { data: counter } = useContractRead({
     address: process.env.NEXT_PUBLIC_DAONAD_ADDRESS as `0x${string}`,
     abi: DAONAD_ABI,
     functionName: 'projectCounter',
