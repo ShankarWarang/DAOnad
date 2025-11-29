@@ -11,6 +11,7 @@ import { useState } from 'react';
 const monadTestnet = defineChain({
   id: 10143,
   name: 'Monad Testnet',
+  network: 'monad-testnet',
   nativeCurrency: {
     decimals: 18,
     name: 'Monad',
@@ -18,13 +19,16 @@ const monadTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_MONAD_RPC_URL || 'https://testnet-rpc.monad.xyz'],
+      http: [process.env.NEXT_PUBLIC_MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet'],
+    },
+    public: {
+      http: [process.env.NEXT_PUBLIC_MONAD_RPC_URL || 'https://rpc.ankr.com/monad_testnet'],
     },
   },
   blockExplorers: {
     default: {
       name: 'Monad Explorer',
-      url: 'https://testnet-explorer.monad.xyz',
+      url: 'https://testnet.monadvision.com/',
     },
   },
   testnet: true,
