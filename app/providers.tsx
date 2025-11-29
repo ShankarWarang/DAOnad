@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, createClient, configureChains } from 'wagmi';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { defineChain } from 'viem';
@@ -30,7 +30,7 @@ const monadTestnet = defineChain({
   testnet: true,
 });
 
-const { chains, provider } = configureChains(
+const { chains, publicClient } = configureChains(
   [monadTestnet],
   [
     jsonRpcProvider({
@@ -47,21 +47,20 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider,
+  publicClient,
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <WagmiProvider client={wagmiClient}>
+    <WagmiConfig config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider chains={chains}>{children}</RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </WagmiConfig>
   );
 }
-

@@ -33,11 +33,13 @@ export default function BackerMode() {
   });
   
   const { isLoading: isApproveConfirming, isSuccess: isApproveSuccess } = useWaitForTransaction({
-    hash: approveHash,
+    hash: approveHash?.hash,
+    enabled: !!approveHash?.hash,
   });
   
   const { isLoading: isBackConfirming, isSuccess: isBackSuccess } = useWaitForTransaction({
-    hash: backHash,
+    hash: backHash?.hash,
+    enabled: !!backHash?.hash,
   });
 
   const handleBackProject = async (projectId: number) => {

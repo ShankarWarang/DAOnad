@@ -34,7 +34,8 @@ export default function FounderMode() {
     functionName: 'createProject',
   });
   const { isLoading: isConfirming, isSuccess } = useWaitForTransaction({
-    hash,
+    hash: hash?.hash,
+    enabled: !!hash?.hash,
   });
 
   const addMilestone = () => {
